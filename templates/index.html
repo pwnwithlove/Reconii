@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconii</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Style de la boîte de résultat */
+        #scanResultBox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            clear: both; /* Pour afficher en dessous du reste du contenu */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" placeholder="Entrez le domaine ici" id="domainInput" value="exemple.com">
+            <button id="scanBtn">Lancer le Scan</button>
+        </div>
+        <div class="history">
+            <h2>Historique des Scans</h2>
+            <div class="scan-result">
+                <strong>Domaine :</strong> exemple.com <br>
+                <strong>Statut :</strong> En cours.. <br>
+                <strong>Date :</strong> 2024-04-10 <br>
+                <button class="result-btn">Accéder au résultat</button>
+            </div>
+            <div class="scan-result">
+                <strong>Domaine :</strong> site-test.com <br>
+                <strong>Statut :</strong> Fini ! ✅
+                <br>
+                <strong>Date :</strong> 2024-04-09<br>
+                <button class="result-btn">Accéder au résultat</button>
+            </div>
+            <div class="scan-result">
+                <strong>Domaine :</strong> nouveau-site.com <br>
+                <strong>Statut :</strong> Fini ! ✅
+                <br>
+                <strong>Date :</strong> 2024-04-08 <br>
+                <button class="result-btn">Accéder au résultat</button>
+            </div>
+        </div>
+
+        <!-- Boîte de résultat -->
+        <div id="scanResultBox" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('scanBtn').addEventListener('click', function() {
+            var domain = document.getElementById('domainInput').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/scan', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var scanResultBox = document.getElementById('scanResultBox');
+                    scanResultBox.style.display = 'block'; // Affiche la boîte de résultat
+                    scanResultBox.innerText = xhr.responseText; // Affiche la réponse dans la boîte de résultat
+                }
+            };
+            xhr.send('domain=' + encodeURIComponent(domain));
+        });
+    </script>
+</body>
+</html>
