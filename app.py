@@ -7,13 +7,6 @@ import os
 
 app = Flask(__name__)
 
-'''
-TODO: 
-- Modifier la page index.html pour afficher correctement les réponses de l'api qui sont en json
-- Vérifier qu'une fois le scan fini la route /done est bien appelée par le script et c'est bien update en db
-- Faire en sorte que le script se lance en background, pour l'instant l'instance du thread est créée mais elle est pas lancée
-'''
-
 @app.route('/')
 def index():
     return render_template('index.html')
