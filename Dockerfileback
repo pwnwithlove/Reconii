@@ -12,7 +12,13 @@ RUN wget https://golang.org/dl/go1.22.0.linux-amd64.tar.gz \
 ENV GOPATH=/root/go
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
-# Installation des outils Go
+# Téléchargement et installation de Amass
+# RUN wget https://github.com/owasp-amass/amass/releases/download/v3.19.3/amass_linux_amd64.zip \
+#     && unzip amass_linux_amd64.zip \
+#     && cd amass_linux_amd64 \
+#     && mv amass /app/scripts/
+
+# Installation des autres outils Go
 RUN go install github.com/tomnomnom/assetfinder@latest && \
     go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
     go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
@@ -23,17 +29,20 @@ RUN go install github.com/tomnomnom/assetfinder@latest && \
 # Copie du fichier .env dans l'image Docker
 COPY .env /app/.env
 
+# Installation de Shodan en utilisant la clé API du fichier .env
+#RUN pip3 install shodan --break-system-packages && \
+#    export $(cat /app/.env | xargs) && \
+#    shodan init $SHODAN_KEY
+
 # Définir le répertoire de travail
 WORKDIR /app
 
 COPY . .
 RUN pip3 install -r requirements.txt --break-system-packages
 
+
 # Exposer le port sur lequel Flask va tourner
 EXPOSE 5000
-
-# Définir la variable d'environnement FLASK_APP
-ENV FLASK_APP=app.py
 
 # Commande pour démarrer Flask
 CMD ["flask", "run", "--host=0.0.0.0"]

@@ -18,31 +18,12 @@
 <body>
     <div class="container">
         <div class="search-box">
-            <input type="text" placeholder="Entrez le domaine ici" id="domainInput" value="exemple.com">
+            <input type="text" placeholder="Entrez le domaine ici" id="domainInput">
             <button id="scanBtn">Lancer le Scan</button>
         </div>
         <div class="history">
             <h2>Historique des Scans</h2>
-            <div class="scan-result">
-                <strong>Domaine :</strong> exemple.com <br>
-                <strong>Statut :</strong> En cours.. <br>
-                <strong>Date :</strong> 2024-04-10 <br>
-                <button class="result-btn">Accéder au résultat</button>
-            </div>
-            <div class="scan-result">
-                <strong>Domaine :</strong> site-test.com <br>
-                <strong>Statut :</strong> Fini ! ✅
-                <br>
-                <strong>Date :</strong> 2024-04-09<br>
-                <button class="result-btn">Accéder au résultat</button>
-            </div>
-            <div class="scan-result">
-                <strong>Domaine :</strong> nouveau-site.com <br>
-                <strong>Statut :</strong> Fini ! ✅
-                <br>
-                <strong>Date :</strong> 2024-04-08 <br>
-                <button class="result-btn">Accéder au résultat</button>
-            </div>
+            <div id="res"></div>
         </div>
 
         <!-- Boîte de résultat -->
@@ -59,11 +40,52 @@
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     var scanResultBox = document.getElementById('scanResultBox');
                     scanResultBox.style.display = 'block'; // Affiche la boîte de résultat
-                    scanResultBox.innerText = xhr.responseText; // Affiche la réponse dans la boîte de résultat
+                    scanResultBox.innerText = "Le scan a été lancé !"; // Affiche la réponse dans la boîte de résultat
+                } else {
+                    var scanResultBox = document.getElementById('scanResultBox');
+                    scanResultBox.style.display = 'block'; // Affiche la boîte de résultat
+                    scanResultBox.innerText = "Le scan n'a pas pu être lancé.."; // Affiche la réponse dans la boîte de résultat
                 }
             };
             xhr.send('domain=' + encodeURIComponent(domain));
         });
+
+        window.addEventListener("DOMContentLoaded", async function() {
+            var finish_template = `
+            <div class="scan-result">
+                <strong>Domaine :</strong> [DOMAIN_PLACEHOLDER] <br>
+                <strong>Statut :</strong> Fini ! ✅
+                <br>
+                <button class="result-btn" onclick="get_res('[DOMAIN_PLACEHOLDER]')">Accéder au résultat</button>
+            </div>
+            `;
+            var notyet_template = `
+            <div class="scan-result">
+                <strong>Domaine :</strong> [DOMAIN_PLACEHOLDER] <br>
+                <strong>Statut :</strong> En cours.. <br>
+            </div>
+            `;
+            var to_append = ""
+            var res = await fetch('/getscan');
+            var data = await res.json();
+            if(data.length == 0){
+                to_append = "<p>Aucun résultat n'est disponible.</p>"
+            } else {
+                for(var i=0; i<data.length; i++)
+                {
+                    if(data[i].status == "1") {
+                        to_append += finish_template.replaceAll("[DOMAIN_PLACEHOLDER]", data[i].domain)
+                    } else {
+                        to_append += notyet_template.replace("[DOMAIN_PLACEHOLDER]", data[i].domain)
+                    }
+                }
+            }
+            document.getElementById("res").innerHTML = to_append;
+        })
+
+        function get_res(domain) {
+            document.location.href = "/download?domain="+domain;
+        }
     </script>
 </body>
 </html>
